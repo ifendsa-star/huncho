@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="finder.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Big+Shoulders+Display:wght@700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Big+Shoulders+Display:wght@700;800;900&family=Rye&family=Yesteryear&display=swap" rel="stylesheet">
 <style>
 :root{
   --black:#000;
@@ -212,6 +212,14 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:200;o
 .visit{background:radial-gradient(700px 400px at 90% 10%,rgba(139,92,255,.18),transparent 60%),#121214}
 .hours tr.today td{color:var(--green)}
 
+
+
+/* fancier hero title: sign-painter western + barbershop script */
+.title h1{font-family:"Rye",Georgia,serif;font-weight:400;font-size:clamp(50px,8.6vw,124px);line-height:.95;letter-spacing:.03em;
+  text-shadow:0 3px 0 rgba(0,0,0,.35);padding-top:.05em}
+.title h1 small{font-family:"Yesteryear","Brush Script MT",cursive;font-weight:400;text-transform:none;letter-spacing:.01em;
+  font-size:.62em;line-height:1;margin-top:-.08em;padding-left:0;transform:rotate(-5deg);display:block;
+  -webkit-text-fill-color:var(--orange);color:var(--orange);text-shadow:0 4px 18px rgba(250,90,0,.35)}
 
 /* finished-cuts gallery */
 .grid{grid-template-columns:repeat(3,1fr);grid-auto-rows:auto;grid-auto-flow:dense;gap:12px}
