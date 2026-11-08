@@ -192,3 +192,9 @@ input.vh{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .nocam{border-left-color:var(--orange)}
 .stage{background:radial-gradient(circle at 50% 38%,#2a2a2e,#0f0f11 72%)}
 .scope .badge.ok{border-color:#3f9a55;color:#a8e2b6}
+
+.camhelp{margin:16px 0 0;max-width:52ch;background:var(--concrete);border:1px solid #33333a;border-left:3px solid var(--orange);border-radius:4px;padding:14px 16px;font-size:14.5px;color:#d6d6d9}
+.camhelp .hh{display:block;font:800 18px/1.1 var(--display);text-transform:uppercase;color:#fff;margin-bottom:6px}
+.camhelp ol{margin:0 0 8px;padding-left:18px;display:grid;gap:6px}
+.camhelp p{margin:0;color:#a9a9ad}
+.camhelp b{color:#fff;font-weight:600}

@@ -233,20 +233,44 @@ function cameraAllowedHere() {
 const CAM_OK = cameraAllowedHere();
 const CAM = {on: false, stream: null, raf: 0, hold: 0, last: 0, lastDetect: 0, lm: null, msg: '', capturing: false, pauseUntil: 0};
 const HOLD_MS = 900;
+function camHelpHTML(reason) {
+  const ua = navigator.userAgent, ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1),
+    android = /Android/.test(ua), mac = /Macintosh/.test(ua) && !ios, inApp = /Instagram|FBAN|FBAV|FB_IAB|Line\/|TikTok|Snapchat/i.test(ua),
+    chrome = /Chrome|CriOS/.test(ua) && !/Edg/.test(ua), safari = /Safari/.test(ua) && !/Chrome|CriOS|FxiOS|Edg/.test(ua), firefox = /Firefox|FxiOS/.test(ua);
+  const steps = [];
+  if (inApp) steps.push('You\'re inside an app\'s built-in browser, which blocks the camera. Tap the <b>⋯</b> menu and choose <b>Open in browser</b> (Safari or Chrome), then try again.');
+  else if (reason === 'busy') steps.push('Another app (FaceTime, Zoom, Teams, Photo Booth) is using the camera. Close it, then press <b>Turn on camera</b> again.');
+  else if (reason === 'none') steps.push('No camera was found on this device. Use <b>Upload a photo</b> instead.');
+  else {
+    if (ios && safari) steps.push('On iPhone: open <b>Settings → Apps → Safari → Camera</b> and choose <b>Allow</b> (or <b>Ask</b>). Then reload this page.');
+    else if (ios) steps.push('On iPhone: open <b>Settings</b>, find your browser app, and switch <b>Camera</b> on. Then reload this page.');
+    else if (android) steps.push('Tap the <b>lock icon</b> next to the web address, then <b>Permissions → Camera → Allow</b>. Then reload this page.');
+    else {
+      if (chrome) steps.push('Click the <b>camera or lock icon</b> at the left of the address bar, set <b>Camera</b> to <b>Allow</b>, then reload the page.');
+      else if (safari) steps.push('In the menu bar choose <b>Safari → Settings for this website</b> and set <b>Camera</b> to <b>Allow</b>, then reload the page.');
+      else if (firefox) steps.push('Click the <b>camera icon</b> in the address bar, remove the block, then reload and choose <b>Allow</b>.');
+      else steps.push('Allow camera access for this site in your browser\'s site settings, then reload the page.');
+      if (mac) steps.push('Still blocked? On your Mac open <b>System Settings → Privacy &amp; Security → Camera</b> and switch your browser on.');
+    }
+  }
+  return `<b class="hh">Turn the camera on</b><ol>${steps.map(x => `<li>${x}</li>`).join('')}</ol><p>Or use <b>Upload a photo</b> instead: front, then each side.</p>`;
+}
+function showCamHelp(reason) { const h = $('#hfCamHelp'); if (!h) return; h.innerHTML = camHelpHTML(reason); h.hidden = false; }
 async function startCamera() {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { setBadge('This browser can\'t open the camera here. Use Take photo or Upload.', 'err'); return; }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { setBadge('This browser can\'t open the camera.', 'err'); showCamHelp('blocked'); return; }
+  $('#hfCamHelp').hidden = true;
   setBadge('Asking for camera access…');
   $('#hfCamBtn').disabled = true;
   try {
-    CAM.stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'user', width: {ideal: 1280}, height: {ideal: 960}}, audio: false});
+    try { CAM.stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'user', width: {ideal: 1280}, height: {ideal: 960}}, audio: false}); }
+    catch (e1) { if (e1 && (e1.name === 'OverconstrainedError' || e1.name === 'NotReadableError' || e1.name === 'AbortError')) CAM.stream = await navigator.mediaDevices.getUserMedia({video: true, audio: false}); else throw e1; }
   } catch (e) {
     $('#hfCamBtn').disabled = false; CAM.stream = null;
     const n = e && e.name;
-    if (n === 'NotAllowedError' || n === 'SecurityError') { $('#hfLensPrompt').hidden = true; $('#hfNoCam').hidden = false; }
-    setBadge(n === 'NotAllowedError' || n === 'SecurityError' ? 'Camera access is blocked. Allow it in your browser settings, or use a photo instead.'
-      : n === 'NotFoundError' || n === 'OverconstrainedError' ? 'No camera found. Upload a photo instead.'
-      : n === 'NotReadableError' ? 'Your camera is busy in another app. Close it and try again.'
-      : 'The camera didn\'t start. If you blocked it, allow camera access in your browser settings, or use a photo instead.', 'err');
+    if (!CAM_OK) { $('#hfLensPrompt').hidden = true; $('#hfNoCam').hidden = false; setBadge('Camera isn\'t available on this page.', 'err'); return; }
+    const reason = n === 'NotReadableError' || n === 'AbortError' ? 'busy' : n === 'NotFoundError' || n === 'OverconstrainedError' ? 'none' : 'blocked';
+    setBadge(reason === 'busy' ? 'Your camera is busy in another app.' : reason === 'none' ? 'No camera found.' : 'Camera access was blocked.', 'err');
+    showCamHelp(reason);
     return;
   }
   const v = $('#hfVideo'); v.srcObject = CAM.stream;
