@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Huncho Barbers Payneham</title>
+<meta name="description" content="Huncho Barbers, 276 Payneham Road, Payneham SA. Skin fades, tapers, beard work and hot towel shaves. Walk-ins welcome, open 7 days.">
+<link rel="icon" href="img/favicon.png">
+<link rel="stylesheet" href="finder.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Big+Shoulders+Display:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#000;
+  --wall:#1c1c1e;
+  --steel:#2c2c2f;
+  --ash:#9a9a9e;
+  --white:#fff;
+  --orange:#fa5a00;
+  --violet:#6a4bd8;
+  --green:#3f9a55;
+  --cream:#ebe1d1;
+  --tan:#c9b391;
+  --ink:#0f0f11;
+  --concrete:#1f1f22;
+  --leaf:#2f5a34;
+  --display:"Big Shoulders Display", Impact, sans-serif;
+  --body:"Archivo", system-ui, sans-serif;
+  --gutter:clamp(20px,5vw,72px);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--black);color:var(--white);font:400 17px/1.6 var(--body);-webkit-font-smoothing:antialiased}
+img,video{display:block;max-width:100%}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+
+/* ---------- top bar ---------- */
+.bar{position:fixed;inset:0 0 auto 0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+  padding:14px var(--gutter);transition:background .35s, padding .35s}
+.bar.solid{background:rgba(0,0,0,.92);padding-top:10px;padding-bottom:10px;border-bottom:1px solid var(--steel)}
+.bar .mark{display:flex;align-items:center;gap:12px;text-decoration:none;opacity:0;transition:opacity .5s}
+.bar.show .mark{opacity:1}
+.bar .mark img{width:54px;height:auto}
+.bar .mark span{font:800 22px/1 var(--display);letter-spacing:.02em}
+.bar nav{display:flex;gap:28px;align-items:center}
+.bar nav a{text-decoration:none;font-weight:500;font-size:15px;color:#ddd}
+.bar nav a:hover{color:var(--white)}
+.bar nav .call{color:var(--black);background:var(--orange);padding:10px 16px;border-radius:3px;font-weight:600}
+.bar nav .call:hover{color:var(--black);background:#ff7426}
+@media (max-width:820px){.bar nav a:not(.call){display:none}.bar .mark span{display:none}}
+@media (max-aspect-ratio:1/1){#intro{object-position:58% 50%}#loop{object-position:50% 50%}}
+
+/* ---------- hero ---------- */
+.hero{position:relative;height:100svh;min-height:560px;overflow:hidden;background:#000}
+.hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#loop{opacity:0;transform:scale(1.04);transition:opacity 1.1s ease, transform 8s ease-out}
+.hero.revealed #loop{opacity:1;transform:scale(1)}
+#intro{transition:opacity .9s ease, filter .9s ease}
+.hero.revealed #intro{opacity:0;filter:blur(6px)}
+.shade{position:absolute;inset:0;background:
+  radial-gradient(ellipse at 50% 45%, rgba(0,0,0,.35), rgba(0,0,0,.8) 75%),
+  linear-gradient(to bottom, rgba(0,0,0,.4), rgba(0,0,0,0) 30%, rgba(0,0,0,.85));
+  opacity:0;transition:opacity 1.2s ease}
+.hero.revealed .shade{opacity:1}
+.intro-vignette{position:absolute;inset:0;background:linear-gradient(to bottom, rgba(0,0,0,.45), rgba(0,0,0,0) 22%, rgba(0,0,0,0) 78%, rgba(0,0,0,.5))}
+
+.title{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:90px var(--gutter) 60px}
+.title .logo{width:min(340px,58vw);opacity:0;transform:scale(1.12);filter:blur(10px);
+  transition:opacity .8s ease .25s, transform 1.1s cubic-bezier(.2,.8,.2,1) .25s, filter .8s ease .25s}
+.title h1{margin:18px 0 0;font:900 clamp(52px,8.4vw,128px)/.86 var(--display);letter-spacing:.005em;text-transform:uppercase;
+  clip-path:inset(0 0 100% 0);transform:translateY(20px);transition:clip-path .9s cubic-bezier(.7,0,.2,1) .75s, transform .9s cubic-bezier(.2,.8,.2,1) .75s}
+.title h1 small{display:block;font-size:.42em;font-weight:800;letter-spacing:.38em;color:var(--orange);margin-top:.35em;padding-left:.38em}
+.title p{margin:22px 0 0;max-width:34ch;color:#e6e6e6;font-size:clamp(16px,1.6vw,19px);opacity:0;transition:opacity .8s ease 1.35s}
+.title .actions{margin-top:28px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;opacity:0;transform:translateY(8px);transition:opacity .7s ease 1.55s, transform .7s ease 1.55s}
+.hero.revealed .title .logo{opacity:1;transform:scale(1);filter:blur(0)}
+.hero.revealed .title h1{clip-path:inset(0 0 -10% 0);transform:none}
+.hero.revealed .title p,.hero.revealed .title .actions{opacity:1;transform:none}
+
+.btn{display:inline-flex;align-items:center;gap:10px;padding:15px 24px;border-radius:3px;font:600 16px/1 var(--body);text-decoration:none;border:1.5px solid transparent;cursor:pointer}
+.btn.primary{background:var(--orange);color:#000}
+.btn.primary:hover{background:#ff7426}
+.btn.ghost{border-color:rgba(255,255,255,.55);color:#fff;background:rgba(0,0,0,.25)}
+.btn.ghost:hover{border-color:#fff}
+
+.status{position:absolute;left:var(--gutter);bottom:26px;display:flex;align-items:center;gap:10px;font-size:14px;color:#ddd;opacity:0;transition:opacity .6s ease 1.9s}
+.hero.revealed .status{opacity:1}
+.dot{width:9px;height:9px;border-radius:50%;background:#666}
+.dot.open{background:#3ad16b;box-shadow:0 0 0 4px rgba(58,209,107,.18)}
+.skip{position:absolute;right:var(--gutter);bottom:22px;background:none;border:0;color:#ddd;font:500 14px var(--body);cursor:pointer;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.4);transition:opacity .4s}
+.hero.revealed .skip{opacity:0;pointer-events:none}
+
+/* ---------- sections ---------- */
+section{padding:clamp(72px,10vw,140px) var(--gutter)}
+.wrap{max-width:1240px;margin:0 auto}
+h2{font:900 clamp(44px,6.4vw,92px)/.9 var(--display);text-transform:uppercase;margin:0;letter-spacing:.005em}
+.lede{color:#cfcfd2;max-width:52ch;margin:22px 0 0;font-size:18px}
+
+/* services: barbershop board */
+.services{background:var(--wall);background-image:
+  repeating-linear-gradient(90deg, rgba(255,255,255,.018) 0 1px, transparent 1px 120px)}
+.svc-head{display:grid;grid-template-columns:1.1fr 1fr;gap:40px;align-items:end}
+.board{margin-top:56px;display:grid;grid-template-columns:1fr 1fr;column-gap:64px}
+.item{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;padding:24px 0;border-top:1px solid #3a3a3e}
+.item h3{margin:0;font:800 30px/1 var(--display);text-transform:uppercase;letter-spacing:.01em}
+.item .lead{align-self:end;height:1px;margin-bottom:8px;border-bottom:2px dotted #55555a}
+.item p{grid-column:1 / -1;margin:0;color:var(--ash);font-size:15.5px;max-width:46ch}
+.board-note{margin-top:36px;color:var(--ash);font-size:15px}
+.board-note strong{color:#fff;font-weight:600}
+@media (max-width:820px){.svc-head{grid-template-columns:1fr}.board{grid-template-columns:1fr}}
+
+/* work */
+.work .row{display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap}
+.work .row a{color:var(--orange);font-weight:600;text-decoration:none;border-bottom:1.5px solid currentColor;padding-bottom:2px}
+.grid{margin-top:48px;display:grid;grid-template-columns:repeat(12,1fr);grid-auto-rows:clamp(120px,14vw,190px);gap:10px}
+.grid figure{margin:0;position:relative;overflow:hidden;background:#111}
+.grid img{width:100%;height:100%;object-fit:cover}
+.grid figcaption{position:absolute;left:12px;bottom:10px;font-size:13px;font-weight:500;background:rgba(0,0,0,.72);padding:5px 9px;border-radius:2px}
+.g1{grid-column:1/5;grid-row:span 3}
+.g2{grid-column:5/13;grid-row:span 2}
+.g3{grid-column:5/9;grid-row:span 2}
+.g4{grid-column:9/13;grid-row:span 4}
+.g5{grid-column:1/5;grid-row:span 3}
+.g6{grid-column:5/9;grid-row:span 2}
+.g7{grid-column:1/7;grid-row:span 2}
+.g8{grid-column:7/13;grid-row:span 2}
+@media (max-width:820px){
+  .grid{grid-template-columns:1fr 1fr;grid-auto-rows:150px}
+  .grid figure{grid-column:auto!important;grid-row:span 2!important}
+  .grid .wide{grid-column:1/-1!important}
+}
+
+/* move story */
+.move{display:grid;grid-template-columns:1fr 1fr;gap:0;padding:0;background:#000}
+.move .pic{min-height:520px;background:url(img/storefront.jpg) center/cover}
+.move .txt{padding:clamp(56px,8vw,120px) var(--gutter);display:flex;flex-direction:column;justify-content:center;border-left:6px solid var(--orange)}
+.move .from{font:800 26px/1.1 var(--display);color:var(--ash);text-decoration:line-through;text-decoration-color:var(--orange);text-decoration-thickness:3px;margin:0 0 10px}
+@media (max-width:820px){.move{grid-template-columns:1fr}.move .pic{min-height:300px}.move .txt{border-left:0;border-top:6px solid var(--orange)}}
+
+/* visit */
+.visit{background:var(--wall)}
+.visit-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:clamp(40px,6vw,96px);margin-top:48px}
+.addr{font:800 clamp(34px,4vw,54px)/1 var(--display);text-transform:uppercase;margin:0}
+.addr span{display:block;color:var(--ash);font-size:.55em;margin-top:10px;letter-spacing:.02em}
+.contact{margin-top:32px;display:flex;flex-direction:column;gap:14px;font-size:18px}
+.contact a{text-decoration:none}
+.contact .num{font:800 34px/1 var(--display);letter-spacing:.02em}
+.contact small{display:block;color:var(--ash);font-size:14px}
+.visit .btns{margin-top:30px;display:flex;gap:12px;flex-wrap:wrap}
+.visit .btn.ghost{background:transparent}
+table.hours{width:100%;border-collapse:collapse;font-size:17px}
+.hours caption{text-align:left;font:800 28px/1 var(--display);text-transform:uppercase;padding-bottom:14px}
+.hours td{padding:13px 0;border-top:1px solid #3a3a3e}
+.hours td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.hours tr.today td{color:var(--orange);font-weight:600}
+.walkin{margin-top:18px;color:var(--ash);font-size:15px}
+@media (max-width:820px){.visit-grid{grid-template-columns:1fr}}
+
+/* hiring */
+.hiring{padding:56px var(--gutter);background:var(--orange);color:#000}
+.hiring .wrap{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
+.hiring h2{font-size:clamp(36px,4.6vw,64px)}
+.hiring p{margin:8px 0 0;font-size:17px;font-weight:500}
+.hiring .btn{background:#000;color:#fff}
+.hiring .btn:hover{background:#222}
+
+footer{padding:56px var(--gutter) 40px;border-top:1px solid var(--steel)}
+footer .wrap{display:flex;justify-content:space-between;gap:32px;flex-wrap:wrap;align-items:flex-start}
+footer img{width:120px}
+footer p{margin:0;color:var(--ash);font-size:14px;line-height:1.8}
+footer a{text-decoration:none;color:#ddd}
+footer a:hover{color:#fff}
+
+
+/* ---------- colour & motion pass ---------- */
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:200;opacity:.06;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.logo-wrap{position:relative;width:min(300px,56vw);margin-bottom:clamp(20px,4vw,48px);aspect-ratio:1.23;display:grid;place-items:center;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .25s ease-out}
+.logo-wrap::before{content:"";position:absolute;inset:-18%;border-radius:50%;background:radial-gradient(circle at 40% 45%,rgba(250,90,0,.55),rgba(139,92,255,.35) 45%,transparent 70%);filter:blur(30px);opacity:0;transition:opacity 1.2s ease .4s;animation:glow 5s ease-in-out infinite}
+.hero.revealed .logo-wrap::before{opacity:1}
+@keyframes glow{50%{transform:scale(1.12) rotate(20deg)}}
+.title .logo-wrap .logo{width:100%;position:relative}
+.ring-text{position:absolute;width:128%;left:-14%;top:50%;transform:translateY(-50%);opacity:0;transition:opacity 1s ease 1.2s;animation:spin 30s linear infinite}
+.hero.revealed .ring-text{opacity:1}
+.ring-text text{font:800 12px var(--display);letter-spacing:2px;fill:rgba(255,255,255,.75)}
+@keyframes spin{to{transform:translateY(-50%) rotate(360deg)}}
+.shine{position:absolute;inset:0;background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.75) 50%,transparent 62%) no-repeat;background-size:250% 100%;background-position:150% 0;
+  -webkit-mask:url(img/logo.png) center/contain no-repeat;mask:url(img/logo.png) center/contain no-repeat;pointer-events:none}
+.hero.revealed .shine{animation:shine 5s ease-in-out 2.2s infinite}
+@keyframes shine{0%{background-position:150% 0}35%,100%{background-position:-60% 0}}
+.title h1{background:linear-gradient(180deg,#fff 55%,#ffd9c2);-webkit-background-clip:text;background-clip:text;color:transparent}
+.title h1 small{color:var(--orange);-webkit-text-fill-color:var(--orange)}
+.btn.primary{box-shadow:0 8px 30px -10px rgba(250,90,0,.8)}
+.dot.open{background:var(--green)}
+
+.ticker{background:var(--orange);color:#000;overflow:hidden;border-top:2px solid #000;border-bottom:2px solid #000;transform:rotate(-1.2deg);margin:-14px -10px 0;position:relative;z-index:3}
+.ticker-track{display:flex;gap:26px;align-items:center;width:max-content;padding:14px 0;animation:tick 32s linear infinite}
+.ticker span{font:900 30px/1 var(--display);text-transform:uppercase;letter-spacing:.02em;white-space:nowrap}
+.ticker i{font-style:normal;font-size:20px}
+@keyframes tick{to{transform:translateX(-50%)}}
+
+.finder-promo{position:relative;overflow:hidden;background:radial-gradient(900px 500px at 85% 50%,rgba(139,92,255,.28),transparent 60%),radial-gradient(700px 400px at 10% 90%,rgba(250,90,0,.16),transparent 60%),#07060b}
+.promo-art .ring.on{background:conic-gradient(from 0deg,var(--green),var(--orange) 40%,var(--violet) 70%,var(--green));animation:spin2 9s linear infinite}
+@keyframes spin2{to{transform:rotate(360deg)}}
+.promo-art .face img{filter:none}
+.promo-art .tag{position:absolute;right:2%;bottom:10%;background:#fff;color:#000;font:800 16px/1 var(--display);text-transform:uppercase;padding:9px 12px;border-radius:3px;transform:rotate(-4deg);box-shadow:0 10px 30px -10px rgba(0,0,0,.6)}
+.services{background:linear-gradient(180deg,#120c1f,#0b0b0d 70%)}
+.item h3{transition:color .2s}
+.item:hover h3{color:var(--orange)}
+.item:nth-child(4n+2):hover h3{color:var(--violet)}
+.item:nth-child(4n+3):hover h3{color:var(--green)}
+.grid figure img{transition:transform .8s cubic-bezier(.2,.8,.2,1),filter .5s}
+.grid figure:hover img{transform:scale(1.05)}
+.grid figcaption{background:var(--orange);color:#000;font-weight:600}
+.visit{background:radial-gradient(700px 400px at 90% 10%,rgba(139,92,255,.18),transparent 60%),#121214}
+.hours tr.today td{color:var(--green)}
+
+/* ---------- authentic palette: logo orange, concrete, chair leather, plants, mirror LEDs ---------- */
+body{background:var(--ink)}
+.logo-wrap::before{background:radial-gradient(circle at 45% 45%,rgba(250,90,0,.5),rgba(250,90,0,.12) 45%,transparent 70%)}
+.title h1{background:linear-gradient(180deg,#fff 50%,var(--cream));-webkit-background-clip:text;background-clip:text}
+.finder-promo{background:radial-gradient(800px 480px at 82% 50%,rgba(106,75,216,.16),transparent 62%),radial-gradient(600px 380px at 8% 95%,rgba(250,90,0,.12),transparent 60%),var(--concrete)}
+.promo-art .ring.on{background:conic-gradient(from 0deg,var(--orange),var(--tan) 45%,var(--orange) 75%,var(--orange))}
+.promo-art .tag{background:var(--cream)}
+.services{background:var(--cream);color:var(--ink);background-image:none}
+.services h2{color:var(--ink)}
+.services .lede{color:#4a4339}
+.services .lede a{color:#c44700!important}
+.item{border-top-color:rgba(15,15,17,.16)}
+.item h3{color:var(--ink)}
+.item .lead{border-bottom-color:rgba(15,15,17,.25)}
+.item p{color:#5a5248}
+.item:hover h3,.item:nth-child(4n+2):hover h3,.item:nth-child(4n+3):hover h3{color:#d14d00}
+.board-note{color:#5a5248}.board-note strong{color:var(--ink)}
+.work{background:var(--ink)}
+.grid figcaption{background:var(--cream);color:var(--ink)}
+.move{background:var(--concrete)}
+.move .txt{border-left-color:var(--orange)}
+.visit{background:var(--concrete)}
+.addr span,.contact small{color:#a39b90}
+.hours td{border-top-color:#34343a}
+.hours tr.today td{color:var(--orange)}
+.dot.open{background:#4cc46a;box-shadow:0 0 0 4px rgba(76,196,106,.18)}
+footer{background:var(--ink)}
+.ticker{border-color:var(--ink)}
+
+@media (prefers-reduced-motion:reduce){.ticker-track,.ring-text,.promo-art .ring.on,.logo-wrap::before{animation:none!important}}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:.01ms!important;transition-delay:0s!important;animation:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<header class="bar" id="bar">
+  <a class="mark" href="#top" aria-label="Huncho Barbers home"><img src="img/logo.png" alt=""><span>Huncho Barbers</span></a>
+  <nav>
+    <a href="#finder" data-open-finder>Haircut Finder</a>
+    <a href="#cuts">Cuts</a>
+    <a href="#work">Our work</a>
+    <a href="#visit">Hours &amp; location</a>
+    <a class="call" href="tel:0431474740">Call 0431 474 740</a>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="hero" id="hero" aria-label="Huncho Barbers Payneham" style="padding:0">
+    <video id="loop" src="media/loop.mp4" muted loop playsinline preload="auto" aria-hidden="true"></video>
+    <video id="intro" src="media/intro.mp4" poster="img/poster.jpg" muted playsinline autoplay preload="auto" aria-hidden="true"></video>
+    <div class="intro-vignette"></div>
+    <div class="shade"></div>
+
+    <div class="title">
+      <div class="logo-wrap" id="logoWrap">
+        <svg class="ring-text" viewBox="0 0 200 200" aria-hidden="true"><defs><path id="ringPath" d="M100,100 m-86,0 a86,86 0 1,1 172,0 a86,86 0 1,1 -172,0"/></defs><text textLength="532" lengthAdjust="spacing"><textPath href="#ringPath" startOffset="0" textLength="532" lengthAdjust="spacing">HUNCHO BARBERS ✦ PAYNEHAM ✦ WALK-INS WELCOME ✦ OPEN 7 DAYS ✦</textPath></text></svg>
+        <img class="logo" src="img/logo.png" alt="Huncho Barbers logo">
+        <span class="shine" aria-hidden="true"></span>
+      </div>
+      <h1>Huncho<small>Barbers</small></h1>
+      <p>Sharp fades, clean tapers and proper beard work on Payneham Road. Walk in any day of the week.</p>
+      <div class="actions">
+        <a class="btn primary" href="tel:0431474740">Call to book</a>
+        <a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=Huncho+Barber+276+Payneham+Road+Payneham+SA+5070" target="_blank" rel="noopener">Get directions</a>
+      </div>
+    </div>
+
+    <div class="status" aria-live="polite"><span class="dot" id="dot"></span><span id="statusText">Open 7 days</span></div>
+    <button class="skip" id="skip" type="button">Skip intro</button>
+  </section>
+
+
+  <div class="ticker" aria-hidden="true"><div class="ticker-track"><span>Skin fades</span><i>✦</i><span>Tapers</span><i>✦</i><span>Beard work</span><i>✦</i><span>Hot towel shaves</span><i>✦</i><span>Kids cuts</span><i>✦</i><span>Walk-ins welcome</span><i>✦</i><span>Open 7 days</span><i>✦</i><span>276 Payneham Rd</span><i>✦</i><span>Skin fades</span><i>✦</i><span>Tapers</span><i>✦</i><span>Beard work</span><i>✦</i><span>Hot towel shaves</span><i>✦</i><span>Kids cuts</span><i>✦</i><span>Walk-ins welcome</span><i>✦</i><span>Open 7 days</span><i>✦</i><span>276 Payneham Rd</span><i>✦</i></div></div>
+
+  <section class="finder-promo" id="find" aria-labelledby="findH">
+    <div class="wrap">
+      <div>
+        <h2 id="findH">Not sure what to ask for?<span>Scan your face.</span></h2>
+        <p class="lede">The Haircut Finder scans your face from every angle, estimates its shape and ranks 13 cuts for you. Then it builds your head in 3D wearing the cut, so you can spin it round before you sit in the chair.</p>
+        <ol class="promo-steps">
+          <li>Scan your face like Face ID: look ahead, then roll your head in a circle</li>
+          <li>Get your face shape and your best cuts, then see them on your own 3D head</li>
+          <li>Pick one and send it to your barber before you come in</li>
+        </ol>
+        <button class="btn primary" type="button" data-open-finder>Find my cut</button>
+      </div>
+      <div class="promo-art" aria-hidden="true">
+        <div class="ring"></div><div class="ring on"></div>
+        <div class="face"><img src="img/ig-client.jpg" alt=""></div>
+        <span class="tag">Mid taper, by Huncho</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="services" id="cuts">
+    <div class="wrap">
+      <div class="svc-head">
+        <h2>What we cut</h2>
+        <p class="lede">Every cut finished with a clean line-up and styled before you leave the chair. Not sure what to ask for? Try the <a href="#finder" data-open-finder style="color:var(--orange)">Haircut Finder</a> or just tell your barber what you're after.</p>
+      </div>
+      <div class="board">
+        <div class="item"><h3>Skin fade</h3><span class="lead"></span><p>Taken right down to the skin and blended up seamlessly. Low, mid or high.</p></div>
+        <div class="item"><h3>Taper fade</h3><span class="lead"></span><p>Tidy around the ears and neckline, length kept on the sides. Our most requested cut.</p></div>
+        <div class="item"><h3>Drop fade</h3><span class="lead"></span><p>Fade that curves down behind the ear for a sharper shape at the back.</p></div>
+        <div class="item"><h3>Scissor cut</h3><span class="lead"></span><p>Full scissor work for longer styles, textured crops and fringes.</p></div>
+        <div class="item"><h3>Beard trim &amp; line-up</h3><span class="lead"></span><p>Shaped, faded into the hairline and finished with a straight-razor edge.</p></div>
+        <div class="item"><h3>Hot towel shave</h3><span class="lead"></span><p>Hot towel, lather and a straight-razor shave. Head shaves available too.</p></div>
+        <div class="item"><h3>Hair designs</h3><span class="lead"></span><p>Freehand parts and patterns cut into the fade.</p></div>
+        <div class="item"><h3>Kids cuts</h3><span class="lead"></span><p>Patient barbers, proper cuts. Bring them in after school or on the weekend.</p></div>
+      </div>
+      <p class="board-note"><strong>Walk-ins welcome.</strong> For a set time, call the shop on 0431 474 740.</p>
+    </div>
+  </section>
+
+  <section class="work" id="work">
+    <div class="wrap">
+      <div class="row">
+        <h2>From the chair</h2>
+        <a href="https://www.instagram.com/huncho_barbers/" target="_blank" rel="noopener">More on Instagram @huncho_barbers</a>
+      </div>
+      <div class="grid">
+        <figure class="g1"><img src="img/fade.jpg" alt="Barber blending a mid fade with clippers" loading="lazy"><figcaption>Mid fade</figcaption></figure>
+        <figure class="g2 wide"><img src="img/shop.jpg" alt="Inside the Payneham shop with barber chairs and lit mirrors" loading="lazy"><figcaption>The Payneham shop</figcaption></figure>
+        <figure class="g3"><img src="img/tools.jpg" alt="Clippers, scissors and razors laid out at a barber station" loading="lazy"></figure>
+        <figure class="g4"><img src="img/design.jpg" alt="Skin fade with a freehand design cut in" loading="lazy"><figcaption>Fade with design</figcaption></figure>
+        <figure class="g5"><img src="img/beard.jpg" alt="Barber shaping a client's beard" loading="lazy"><figcaption>Beard work</figcaption></figure>
+        <figure class="g6"><img src="img/scissor.jpg" alt="Barber detailing a cut around the ear" loading="lazy"></figure>
+        <figure class="g7 wide"><img src="img/shave.jpg" alt="Client reclined for a straight-razor shave" loading="lazy"><figcaption>Hot towel shave</figcaption></figure>
+        <figure class="g8 wide"><img src="img/products.jpg" alt="Stacked tins of styling product on the shelf" loading="lazy"><figcaption>Product to take home</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="move" aria-labelledby="moveH">
+    <div class="pic" role="img" aria-label="The Huncho sign outside the Payneham Road shop"></div>
+    <div class="txt">
+      <p class="from">Lower North East Road, Campbelltown</p>
+      <h2 id="moveH">New home, same chairs</h2>
+      <p class="lede">After almost seven years in Campbelltown we've moved six minutes down the road to 276 Payneham Road. Same barbers, same standard, more room. Regulars and new faces both welcome.</p>
+    </div>
+  </section>
+
+  <section class="visit" id="visit">
+    <div class="wrap">
+      <h2>Come through</h2>
+      <div class="visit-grid">
+        <div>
+          <p class="addr">276 Payneham Road<span>Payneham SA 5070</span></p>
+          <div class="contact">
+            <a href="tel:0431474740"><span class="num">0431 474 740</span><small>Call for a set time, or just walk in</small></a>
+            <a href="https://www.instagram.com/huncho_barbers/" target="_blank" rel="noopener">@huncho_barbers on Instagram</a>
+          </div>
+          <div class="btns">
+            <a class="btn primary" href="https://www.google.com/maps/search/?api=1&query=Huncho+Barber+276+Payneham+Road+Payneham+SA+5070" target="_blank" rel="noopener">Get directions</a>
+            <a class="btn ghost" href="https://www.google.com/search?q=Huncho+Barber+Payneham+reviews" target="_blank" rel="noopener">Read our Google reviews</a>
+          </div>
+        </div>
+        <div>
+          <table class="hours" id="hours">
+            <caption>Opening hours</caption>
+            <tbody>
+              <tr data-d="1"><td>Monday</td><td>9am – 6pm</td></tr>
+              <tr data-d="2"><td>Tuesday</td><td>9am – 6pm</td></tr>
+              <tr data-d="3"><td>Wednesday</td><td>9am – 6pm</td></tr>
+              <tr data-d="4"><td>Thursday</td><td>9am – 7pm</td></tr>
+              <tr data-d="5"><td>Friday</td><td>9am – 7pm</td></tr>
+              <tr data-d="6"><td>Saturday</td><td>9am – 5pm</td></tr>
+              <tr data-d="0"><td>Sunday</td><td>10:30am – 4:30pm</td></tr>
+            </tbody>
+          </table>
+          <p class="walkin">Public holiday hours may differ. Give us a call to check.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="hiring" aria-labelledby="hireH">
+    <div class="wrap">
+      <div>
+        <h2 id="hireH">We're hiring barbers</h2>
+        <p>Experienced and proud of your work? Full-time chairs available at Payneham.</p>
+      </div>
+      <a class="btn" href="https://www.instagram.com/huncho_barbers/" target="_blank" rel="noopener">Send us a DM</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <img src="img/logo.png" alt="Huncho Barbers">
+    <p>Huncho Barbers<br>276 Payneham Road, Payneham SA 5070<br><a href="tel:0431474740">0431 474 740</a></p>
+    <p>Open 7 days<br>Walk-ins welcome<br><a href="https://www.instagram.com/huncho_barbers/" target="_blank" rel="noopener">Instagram</a></p>
+  </div>
+</footer>
+
+
+<div class="hf" id="hf" role="dialog" aria-modal="true" aria-label="Haircut Finder">
+  <div class="hf-top">
+    <div class="brand"><img src="img/logo.png" alt="">Haircut Finder</div>
+    <div class="right">
+      <button class="hf-link" id="hfDelete" type="button">Delete my photos</button>
+      <button class="hf-x" id="hfClose" type="button" aria-label="Close Haircut Finder">&times;</button>
+    </div>
+  </div>
+  <ol class="hf-steps"><li><span>Before we start</span></li><li><span>Face scan</span></li><li><span>Analysis</span></li><li><span>Your cuts</span></li><li><span>3D &amp; try-on</span></li><li><span>Send to barber</span></li></ol>
+  <div class="hf-body">
+
+    <div class="hf-pane" data-step="0">
+      <h3>Before we start</h3>
+      <p class="sub">You'll scan your face from the front and both sides with your camera, so we can map it and suggest cuts that suit you. Here's what happens to your photos.</p>
+      <div class="privacy">
+        <div><b>Stays on your device</b><p>The camera only turns on when you press Turn on camera, and the live video never leaves your device. Face mapping and the 3D model run in your browser. Nothing is saved.</p></div>
+        <div><b>Sent once for analysis</b><p>When you press Analyse, your photos and face measurements are sent to Claude, an AI by Anthropic, to estimate your face shape. They aren't kept by Huncho.</p></div>
+        <div><b>Gone when you leave</b><p>Close the page or press Delete my photos and everything is cleared. Nothing is shared with your barber unless you send it.</p></div>
+      </div>
+      <label class="agree"><input type="checkbox" id="hfAgree"> I'm happy for my photos to be processed to analyse my face shape, as described above.</label>
+      <div class="hf-actions"><button class="btn primary" id="hfStart" type="button" disabled>Start face scan</button></div>
+    </div>
+
+    <div class="hf-pane" data-step="1">
+      <div class="scan">
+        <div class="scope" id="hfScope">
+          <svg class="arcs" viewBox="0 0 100 100" aria-hidden="true">
+            <circle id="arc0" class="arc" cx="50" cy="50" r="47" pathLength="300" stroke-dasharray="94 206" stroke-dashoffset="-3"/>
+            <circle id="arc1" class="arc" cx="50" cy="50" r="47" pathLength="300" stroke-dasharray="94 206" stroke-dashoffset="-103"/>
+            <circle id="arc2" class="arc" cx="50" cy="50" r="47" pathLength="300" stroke-dasharray="94 206" stroke-dashoffset="-203"/>
+          </svg>
+          <div class="lens"><canvas id="hfLens"></canvas><div class="ghost" id="hfGhost"></div>
+            <div class="lens-prompt" id="hfLensPrompt"><button class="btn primary" id="hfLensCam" type="button">Turn on camera</button><span>We'll ask your browser for permission</span></div></div>
+          <video id="hfVideo" playsinline muted autoplay hidden></video>
+          <svg class="ticks" viewBox="0 0 100 100" aria-hidden="true"><g id="hfTicks"></g></svg>
+          <div class="sweep"></div>
+          <div class="badge" id="hfBadge" hidden></div>
+        </div>
+        <div>
+          <p class="angle-title" id="hfAngleTitle">Look straight ahead</p>
+          <ul class="tips" id="hfTips"></ul>
+          <div class="hf-actions" style="margin-top:0">
+            <button class="btn primary" id="hfCamBtn" type="button">Turn on camera</button>
+            <button class="btn primary" id="hfSnap" type="button" hidden>Capture now</button>
+            <button class="btn dark" id="hfTake" type="button">Take photo</button>
+            <button class="btn dark" id="hfUp" type="button">Upload a photo</button>
+            <button class="hf-link" id="hfCamOff" type="button" hidden>Turn off camera</button>
+          </div>
+          <p class="nocam" id="hfNoCam" hidden>The live camera scan only works on the shop's own website. Here, upload three photos instead: one looking straight ahead, then one turned to each side.</p>
+          <input class="vh" id="hfCam" type="file" accept="image/*" capture="user" tabindex="-1" aria-hidden="true">
+          <input class="vh" id="hfUpload" type="file" accept="image/*" tabindex="-1" aria-hidden="true">
+          <div class="shots">
+            <div class="shot" data-a="front"><button class="th" type="button" aria-label="Front photo">+</button>Front<br><button class="rm" type="button" hidden>Remove</button></div>
+            <div class="shot" data-a="left"><button class="th" type="button" aria-label="First side photo">+</button>Side one<br><button class="rm" type="button" hidden>Remove</button></div>
+            <div class="shot" data-a="right"><button class="th" type="button" aria-label="Second side photo">+</button>Side two<br><button class="rm" type="button" hidden>Remove</button></div>
+          </div>
+          <p class="sweep-count" id="hfSweepCount" hidden></p>
+          <div class="hf-actions">
+            <button class="btn dark" id="hfFinishScan" type="button" hidden>Finish scan</button>
+            <button class="btn primary" id="hfToAnalysis" type="button" disabled>Analyse my face</button>
+            <button class="hf-link" id="hfSkipSides" type="button" hidden>Skip side photos</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hf-pane" data-step="2">
+      <div class="ana">
+        <div class="ana-photo"><img id="hfAnaImg" alt="Your front photo with face measurements"><canvas id="hfAnaCv"></canvas></div>
+        <div>
+          <div id="hfAnaWorking">
+            <h3>Analysing</h3>
+            <div class="meter"><i id="hfMeter"></i></div>
+            <p class="status-line" id="hfAnaLine">Measuring your face…</p>
+          </div>
+          <div id="hfAnaResult" hidden>
+            <p class="fine" style="margin:0">Your face shape</p>
+            <div class="shape"><b id="hfShape"></b><span id="hfConf"></span></div>
+            <p class="sub" id="hfSummary" style="margin-bottom:0"></p>
+            <dl class="feat" id="hfFeat"></dl>
+            <span class="src" id="hfSrc"></span>
+            <p class="fine" style="margin-top:14px">Face shape is an estimate from a photo. Angle, lighting and hair over the forehead can change it.</p>
+            <div class="hf-actions">
+              <button class="btn primary" id="hfToCuts" type="button">See my cuts</button>
+              <button class="btn dark" data-back type="button">Retake photos</button>
+              <button class="hf-link" id="hfReanalyse" type="button">Analyse again</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hf-pane" data-step="3">
+      <h3>Your cuts</h3>
+      <p class="sub">Ranked for an estimated <b id="hfCutsShape" style="color:#fff"></b> face. Tap any cut to make it your pick, top match or not.</p>
+      <div class="cuts-grid" id="hfTop"></div>
+      <p class="group-h">Also worth a look</p>
+      <div class="cuts-grid" id="hfRest"></div>
+      <p class="fine" style="margin-top:18px">Reference photos show each style on a model, not on you.</p>
+      <div class="pick-bar"><span class="chosen" id="hfChosen"></span><div style="display:flex;gap:10px"><button class="btn dark" data-back type="button">Back</button><button class="btn primary" id="hfTo3D" type="button">See it in 3D</button></div></div>
+    </div>
+
+    <div class="hf-pane" data-step="4">
+      <h3>You in 3D: <span id="hf3dTitle" class="accent"></span></h3>
+      <p class="sub">Your head is shaped from your scan and covered with your own photos. The haircut is a 3D model grown on your head. Try other cuts below.</p>
+      <div class="style-chips" id="hfStyleChips"></div>
+      <div class="td">
+        <div class="stage">
+          <canvas id="hfGL" aria-label="3D model of your head with the chosen haircut"></canvas>
+          <div class="modes" id="hfModes"><button class="chip on" data-m="photo" type="button">Photo</button><button class="chip" data-m="scan" type="button">Scan</button><button class="chip" data-m="clay" type="button">Clay</button><button class="chip" data-m="nohair" type="button">Before</button></div>
+          <p class="hint" id="hfStageMsg">Drag to rotate</p>
+        </div>
+        <div class="tryon">
+          <h4>Try the <span id="hfTryName"></span> on</h4>
+          <div id="hfTryState">
+            <span class="pill">Photo try-on not connected yet</span>
+            <p class="fine">A realistic preview of this cut on your own photo needs an AI image service connected to the shop's website. Until that's switched on, compare your photo with the reference below.</p>
+          </div>
+          <div class="compare">
+            <figure><img id="hfYouImg" alt="Your front photo"><figcaption id="hfYouCap">You now</figcaption></figure>
+            <figure><img id="hfRefImg" alt="Reference photo of the chosen cut"><figcaption id="hfRefCap"></figcaption></figure>
+          </div>
+          <button class="btn primary" id="hfTryGo" type="button" hidden>Preview it on me</button>
+        </div>
+      </div>
+      <div class="hf-actions"><button class="btn dark" data-back type="button">Back to cuts</button><button class="btn primary" id="hfToSend" type="button">Send to my barber</button></div>
+    </div>
+
+    <div class="hf-pane" data-step="5">
+      <h3>Send it to the shop</h3>
+      <p class="sub">Show this to your barber when you sit down, or text it ahead so they know what you're after.</p>
+      <div class="ticket">
+        <img id="hfTicketImg" alt="">
+        <div><h4 id="hfTicketName"></h4><p class="ticket-meta meta" id="hfTicketMeta"></p><p class="fine" id="hfTicketWhy" style="color:#c8c8cc"></p><button class="hf-link" id="hfChange" type="button" style="padding-left:0">Change cut</button></div>
+      </div>
+      <label class="lbl" for="hfNotes">Anything else your barber should know?</label>
+      <textarea id="hfNotes" placeholder="For example: keep some length on top, number 2 on the sides, line up the beard"></textarea>
+      <textarea id="hfCopyFallback" hidden readonly></textarea>
+      <div class="hf-actions">
+        <a class="btn primary" id="hfSms" href="sms:0431474740">Text it to the shop</a>
+        <a class="btn dark" href="tel:0431474740">Call to book</a>
+        <button class="btn dark" id="hfCopy" type="button">Copy details</button>
+      </div>
+      <p class="numline">Huncho Barbers, 276 Payneham Road. 0431 474 740. Walk-ins welcome, open 7 days. Your photos aren't included in the text.</p>
+    </div>
+
+  </div>
+  <div class="toast" id="hfToast" role="status"></div>
+</div>
+<script type="module" src="finder.js"></script>
+
+<script>
+(function(){
+  const hero=document.getElementById('hero'), intro=document.getElementById('intro'), loop=document.getElementById('loop'), bar=document.getElementById('bar');
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let revealed=false;
+  function reveal(){
+    if(revealed) return; revealed=true;
+    hero.classList.add('revealed'); bar.classList.add('show');
+    const p=loop.play(); if(p&&p.catch) p.catch(()=>{});
+    setTimeout(()=>{ try{intro.pause()}catch(e){} },1000);
+  }
+  document.getElementById('skip').addEventListener('click',reveal);
+  if(reduce){ intro.removeAttribute('autoplay'); intro.pause(); reveal(); }
+  else{
+    intro.addEventListener('timeupdate',()=>{ if(intro.currentTime>=5.55) reveal(); });
+    intro.addEventListener('ended',reveal);
+    intro.addEventListener('error',reveal);
+    const p=intro.play();
+    if(p&&p.catch) p.catch(()=>reveal());
+    setTimeout(()=>{ if(intro.currentTime<0.1) reveal(); },2500); // autoplay blocked
+    setTimeout(reveal,9000); // safety net
+  }
+
+  // logo follows the pointer a little
+  const lw=document.getElementById('logoWrap');
+  if(lw && !reduce){ hero.addEventListener('pointermove',e=>{const r=hero.getBoundingClientRect();const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;lw.style.setProperty('--ry',(x*16).toFixed(2)+'deg');lw.style.setProperty('--rx',(-y*12).toFixed(2)+'deg');}); hero.addEventListener('pointerleave',()=>{lw.style.setProperty('--ry','0deg');lw.style.setProperty('--rx','0deg');}); }
+
+  // solid bar after hero
+  const onScroll=()=>{ const s=window.scrollY>window.innerHeight*0.6; bar.classList.toggle('solid',s); if(s) bar.classList.add('show'); };
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+
+  // open now, in Adelaide time
+  const hours={0:[10.5,16.5],1:[9,18],2:[9,18],3:[9,18],4:[9,19],5:[9,19],6:[9,17]};
+  const fmt=h=>{const hr=Math.floor(h),m=Math.round((h-hr)*60),ap=hr>=12?'pm':'am',h12=((hr+11)%12)+1;return h12+(m?':'+String(m).padStart(2,'0'):'')+ap};
+  try{
+    const parts=new Intl.DateTimeFormat('en-AU',{timeZone:'Australia/Adelaide',weekday:'short',hour:'numeric',minute:'numeric',hourCycle:'h23'}).formatToParts(new Date());
+    const get=t=>parts.find(p=>p.type===t).value;
+    const day=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(get('weekday'));
+    const now=+get('hour')+(+get('minute'))/60;
+    const [o,c]=hours[day];
+    const dot=document.getElementById('dot'), txt=document.getElementById('statusText');
+    if(now>=o&&now<c){ dot.classList.add('open'); txt.textContent='Open now until '+fmt(c); }
+    else if(now<o){ txt.textContent='Opens at '+fmt(o)+' today'; }
+    else { const n=(day+1)%7; txt.textContent='Opens '+fmt(hours[n][0])+' '+(n===0?'Sunday':['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][n]); }
+    const row=document.querySelector('#hours tr[data-d="'+day+'"]'); if(row) row.classList.add('today');
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
