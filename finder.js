@@ -360,7 +360,7 @@ function sweepStep(L, t) {
   if (m > 1 && !SW.sectors[sector] && !SW.busy) grabSector(sector, yo, po);
   const {lit} = updateSweepCount();
   if (lit >= TICKS - 2 && Object.keys(SW.sectors).length >= 6 && S.photos.left && S.photos.right) finishSweep();
-  return m > 1.6 ? 'A little less, keep it gentle' : 'Keep going';
+  return m > 3.6 ? 'Ease back a little' : 'Keep going';
 }
 async function grabSector(sector, yo, po) {
   const v = $('#hfVideo'); if (!v.videoWidth) return;
@@ -396,12 +396,13 @@ function renderShots() {
     $('#arc' + i).classList.toggle('done', !!S.photos[k]);
   });
   const hasFront = !!S.photos.front; $('#hfToAnalysis').disabled = !hasFront;
+  $('#hfSkipSides').hidden = !hasFront || !!(S.photos.left && S.photos.right);
 }
 
 function updateCamButtons() {
   const on = CAM.on, touch = matchMedia('(pointer: coarse)').matches;
   $('#hfCamBtn').hidden = on || !CAM_OK; $('#hfNoCam').hidden = CAM_OK;
-  if (!CAM_OK) { $('#hfUp').classList.replace('dark', 'primary'); } $('#hfCamOff').hidden = !on; $('#hfSnap').hidden = !on;
+  if (!CAM_OK) { $('#hfUp').classList.replace('dark', 'primary'); } $('#hfCamOff').hidden = !on; $('#hfSnap').hidden = !on || S.angle === 'sweep';
   $('#hfTake').hidden = on || !touch;
   $('#hfLensPrompt').hidden = on || !CAM_OK || !!S.photos[S.angle];
 }
