@@ -654,6 +654,11 @@ function start3D() {
       $('#hfStageMsg').textContent = 'Building your head…';
       const model = buildHeadModel(S.photos.front, [S.photos.left, S.photos.right], FLmod.FaceLandmarker.FACE_LANDMARKS_TESSELATION);
       HEAD = createHeadViewer($('#hfGL'), model);
+      HEAD.onManual(() => $$('#hfViews .chip').forEach(x => x.classList.remove('on')));
+      const nat = $('#hfTones .tone[data-c="natural"]'); nat.style.setProperty('--tc', rgbCss(HEAD.naturalHair));
+      $$('#hfTones .tone').forEach(t => { if (t.dataset.c !== 'natural') t.style.setProperty('--tc', rgbCss(t.dataset.c.split(',').map(Number))); });
+      $$('#hfViews .chip').forEach(x => x.classList.toggle('on', x.dataset.v === 'spin'));
+      $$('#hfTones .tone').forEach(x => x.classList.toggle('on', x.dataset.c === 'natural'));
       $('#hfStageMsg').textContent = model.views.length > 1 ? `Built from ${model.views.length} of your photos. Drag to turn, scroll to zoom.` : 'Built from your front photo. Add side photos for a better back and sides.';
     }
     if (headPick !== S.pick) { HEAD.setStyle(S.pick); headPick = S.pick; }
@@ -758,6 +763,9 @@ function loop3D() {
   };
   raf = requestAnimationFrame(f);
 }
+function rgbCss(c) { return `rgb(${c.map(v => Math.round(Math.min(1, v * 1.35) * 255)).join(',')})`; }
+$$('#hfViews .chip').forEach(c => c.addEventListener('click', () => { if (!HEAD) return; const v = c.dataset.v; if (v === 'spin') HEAD.setSpin(true); else HEAD.setView(v); $$('#hfViews .chip').forEach(x => x.classList.toggle('on', x === c)); }));
+$$('#hfTones .tone').forEach(t => t.addEventListener('click', () => { if (!HEAD) return; HEAD.setHairColor(t.dataset.c === 'natural' ? null : t.dataset.c.split(',').map(Number)); $$('#hfTones .tone').forEach(x => x.classList.toggle('on', x === t)); }));
 $$('#hfModes .chip').forEach(c => c.addEventListener('click', () => { if (!HEAD) return; const m = c.dataset.m; HEAD.setMode(m === 'scan' ? 1 : m === 'clay' ? 2 : 0); HEAD.setHair(m !== 'nohair'); $$('#hfModes .chip').forEach(x => x.classList.toggle('on', x === c)); }));
 $('#hfTryGo').addEventListener('click', async () => {
   // Only runs when a backend is configured. Expects {image: dataURL, style} -> {image: dataURL|url}

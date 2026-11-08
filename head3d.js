@@ -97,7 +97,9 @@ export function buildHeadModel(front, sides, tess) {
       const th = i / NU * Math.PI * 2 - Math.PI;
       const low = Math.max(0, -Math.sin(phi));
       const jaw = lerp(1, 0.8, low) * lerp(1, 1.04, Math.max(0, Math.sin(phi)) * 0.5);
-      let x = rx * Math.cos(phi) * Math.sin(th) * jaw, y = cyH + ry * Math.sin(phi), z = cz + rz * Math.cos(phi) * Math.cos(th) * lerp(1, 0.92, low);
+      let x = rx * Math.cos(phi) * Math.sin(th) * jaw, y = cyH + ry * Math.sin(phi) * lerp(1, 0.96, Math.max(0, Math.sin(phi)) ** 3), z = cz + rz * Math.cos(phi) * Math.cos(th) * lerp(1, 0.92, low);
+      const back = Math.max(0, -Math.cos(th)), occ = Math.exp(-(((y - cyH + 0.06) / 0.28) ** 2));
+      z -= rz * 0.07 * back * back * occ; x *= 1 - 0.05 * Math.abs(Math.sin(th)) * Math.max(0, Math.sin(phi));
       if (Math.cos(th) > 0) {
         if (inPoly(x, y)) { const fz = faceZ(x, y); if (fz !== null) z = fz - 0.012; }
         else { const [d, bz] = nearestOval(x, y); const w = 1 - sstep(0, 0.16, d); z = lerp(z, Math.max(z, bz - 0.01), w * Math.cos(th)); }
@@ -109,8 +111,12 @@ export function buildHeadModel(front, sides, tess) {
   for (let j = 0; j < NV; j++) for (let i = 0; i < NU; i++) { const a = j * (NU + 1) + i, b = a + 1, c = a + NU + 1, d = c + 1; hIdx.push(a, c, b, b, c, d); }
 
   // ---- neck ----
-  const np = [], nIdx = [], NNU = 48, NNV = 10;
-  for (let j = 0; j <= NNV; j++) { const y = lerp(cyH - ry * 0.45, Ych - 0.75, j / NNV); const sc = lerp(1, 1.08, j / NNV); for (let i = 0; i <= NNU; i++) { const th = i / NNU * Math.PI * 2 - Math.PI; np.push([rx * 0.56 * sc * Math.sin(th), y, cz + rz * 0.04 + rz * 0.52 * sc * Math.cos(th)]); } }
+  const np = [], nIdx = [], NNU = 64, NNV = 18;
+  for (let j = 0; j <= NNV; j++) {
+    const t = j / NNV, y = lerp(cyH - ry * 0.4, Ych - 0.95, t);
+    const flare = sstep(0.55, 1, t), sx = lerp(0.6, 0.66, sstep(0, .5, t)) + flare * 1.25, sz = lerp(0.54, 0.6, sstep(0, .5, t)) + flare * 0.32;
+    for (let i = 0; i <= NNU; i++) { const th = i / NNU * Math.PI * 2 - Math.PI; np.push([rx * sx * Math.sin(th), y - flare * 0.06 * Math.abs(Math.sin(th)), cz - rz * 0.02 + rz * sz * Math.cos(th)]); }
+  }
   for (let j = 0; j < NNV; j++) for (let i = 0; i < NNU; i++) { const a = j * (NNU + 1) + i, b = a + 1, c = a + NNU + 1, d = c + 1; nIdx.push(a, c, b, b, c, d); }
 
   // ---- ears ----
@@ -125,7 +131,7 @@ export function buildHeadModel(front, sides, tess) {
   // normals
   const normals = (P, I, outward) => { const n = P.map(() => [0, 0, 0]); for (let t = 0; t < I.length; t += 3) { const [a, b, c] = [I[t], I[t + 1], I[t + 2]]; const u = [P[b][0] - P[a][0], P[b][1] - P[a][1], P[b][2] - P[a][2]], v = [P[c][0] - P[a][0], P[c][1] - P[a][1], P[c][2] - P[a][2]]; const f = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]]; for (const k of [a, b, c]) { n[k][0] += f[0]; n[k][1] += f[1]; n[k][2] += f[2]; } } return n.map((v, k) => { let l = Math.hypot(...v) || 1; let r = [v[0] / l, v[1] / l, v[2] / l]; const o = outward(P[k]); if (r[0] * o[0] + r[1] * o[1] + r[2] * o[2] < 0) r = r.map(x => -x); return r; }); };
   const fromCentre = p => [p[0], (p[1] - cyH) * 0.6, p[2] - cz];
-  const hN = normals(hp, hIdx, fromCentre), nN = normals(np, nIdx, p => [p[0], 0, p[2] - cz - rz * 0.04]), eN = normals(ep, eIdx, p => [p[0], 0, 0]);
+  const hN = normals(hp, hIdx, fromCentre), nN = normals(np, nIdx, p => [p[0], 0, p[2] - cz + rz * 0.02]), eN = normals(ep, eIdx, p => [p[0], 0, 0]);
   const fN = normals(F, faceTris, () => [0, 0, 1]);
 
   // ---- photo projections ----
@@ -181,7 +187,16 @@ export function buildHeadModel(front, sides, tess) {
     return [(v.a * (q[0] + pivot[0]) + v.tx) / v.photo.w, (-v.a * (q[1] + pivot[1]) + v.ty) / v.photo.h, Math.pow(Math.max(0, n2[2]), 2.2) * 1.15];
   };
 
-  const skin = sampleColor(front.img, [50, 280, 101, 330, 205, 425].map(i => px(i)));
+  const cheeks = [50, 280, 101, 330, 205, 425, 117, 346, 123, 352];
+  const skin = sampleColor(front.img, cheeks.map(i => px(i)));
+  views.forEach((v, k) => {
+    if (k === 0) { v.gain = [1, 1, 1]; return; }
+    const lm = v.photo.lm, side = lm[1].x > (lm[234].x + lm[454].x) / 2 ? [234, 123, 50, 101, 205] : [454, 352, 280, 330, 425];
+    const c = sampleColor(v.photo.img, side.map(i => [lm[i].x * v.photo.w, lm[i].y * v.photo.h]));
+    const fr = sampleColor(front.img, side.map(i => px(i)));
+    v.gain = c.map((x, i) => Math.max(0.85, Math.min(1.2, fr[i] / Math.max(0.05, x))));
+  });
+  const gains = [0, 1, 2].map(k => views[k] ? views[k].gain : [1, 1, 1]);
   let hairC = sampleColor(front.img, [[px(10)[0], px(10)[1] - s * 0.1], [px(109)[0], px(109)[1] - s * 0.08], [px(338)[0], px(338)[1] - s * 0.08]]);
   const lum = c => .3 * c[0] + .59 * c[1] + .11 * c[2];
   if (Math.abs(lum(hairC) - lum(skin)) < 0.12 || lum(hairC) > 0.5) hairC = [0.13, 0.09, 0.07];
@@ -189,22 +204,22 @@ export function buildHeadModel(front, sides, tess) {
 
   // hairline per direction
   const Yf = Y10 + 0.075, Yt = eyeY + 0.24, Ysb = eyeY - 0.07, Yn = mouthY - 0.02;
-  const hairline = th => { const a = Math.abs(th); if (a < .75) return lerp(Yf, Yt, sstep(0, .75, a)); if (a < 1.45) return lerp(Yt, Ysb, sstep(.75, 1.45, a)); if (a < 1.9) return Ysb; return lerp(Ysb, Yn, sstep(1.9, Math.PI, a)); };
+  const hairline = th => { const a = Math.abs(th); if (a < .75) return lerp(Yf, Yt, sstep(0, .75, a)); if (a < 1.45) return lerp(Yt, Ysb, sstep(.75, 1.45, a)); if (a < 1.9) return Ysb; return lerp(Ysb, Yn, sstep(1.9, 2.6, a)) - 0.012 * sstep(2.6, Math.PI, a); };
   const headInfo = {top, Y10, eyeY, cyH, cz, rx, ry, rz, inPoly, hairline};
 
-  return {F, faceTris, fN, hp, hIdx, hN, hTheta, hPhi, np, nIdx, nN, ep, eIdx, eN, views, project, skin, hairC, headInfo, s};
+  return {F, faceTris, fN, hp, hIdx, hN, hTheta, hPhi, np, nIdx, nN, ep, eIdx, eN, views, project, skin, hairC, headInfo, s, gains};
 }
 
 export function hairField(model, id) {
   const st = HAIR[id] || HAIR['mid-fade'];
   const {hp, hTheta, hN, headInfo: I} = model;
-  const L = new Float32Array(hp.length), C = new Float32Array(hp.length * 3);
+  const L = new Float32Array(hp.length), C = new Float32Array(hp.length * 3), D = new Float32Array(hp.length);
   const partX = -I.rx * 0.38;
   for (let k = 0; k < hp.length; k++) {
     const [x, y, z] = hp[k], th = hTheta[k];
     const yl = I.hairline(th);
     const mask = Math.cos(th) > 0.2 && y < I.Y10 + 0.03 && I.inPoly(x, y) ? 0 : sstep(yl - 0.005, yl + 0.025, y);
-    if (!mask) { L[k] = 0; continue; }
+    if (!mask) { L[k] = 0; D[k] = 0; continue; }
     const hv = Math.max(0, Math.min(1, (y - yl) / (I.top - yl)));
     const sideW = Math.abs(Math.sin(th)), backW = Math.max(0, -Math.cos(th)), frontW = Math.max(0, Math.cos(th));
     let len;
@@ -215,9 +230,12 @@ export function hairField(model, id) {
     }
     if (st.crew) len *= lerp(.6, 1.15, frontW);
     if (st.nape) len += st.nape * backW * (1 - sstep(.1, .55, hv)) * sstep(.6, 1, backW);
-    if (st.fringe) len += st.fringe * Math.pow(frontW, 3) * sstep(.55, .95, hv);
+    if (st.fringe) len += st.fringe * Math.pow(frontW, 3) * lerp(1, .55, sstep(.45, 1, hv)) * sstep(0, .06, hv);
     const vol = 0.85 + 0.3 * Math.sin(x * 23.1 + z * 17.3) * Math.sin(y * 19.7 - x * 11.2);
     L[k] = len * mask * (len > 0.04 ? vol : 1) * lerp(0.55, 1, sstep(0, 0.08, hv));
+    // density: thin at the hairline and through the bottom of a fade, full on top
+    const fadeD = st.fade === 0 ? 1 : lerp(st.low > 0.004 ? 0.75 : 0.45, 1, sstep(0, Math.max(.08, st.fade * .7), hv));
+    D[k] = mask * lerp(0.45, 1, sstep(0, 0.07, y - yl)) * fadeD;
     // comb direction (tangent-ish), mixed later with the normal
     let c = [0, 0, 0];
     if (st.comb === 'forward') c = [0, -0.35, 1];
@@ -225,10 +243,11 @@ export function hairField(model, id) {
     else if (st.comb === 'side') c = [x > partX ? 1 : -1, -0.2, 0.15];
     else c = [0, 0.4, 0];
     // only comb where hair is long (top), fades stand out from the scalp
-    const cw = sstep(.35, .8, hv);
+    let cw = sstep(.35, .8, hv);
+    if (st.comb === 'forward') { const fw = Math.pow(frontW, 2) * (1 - sstep(.5, .9, hv)); c = [c[0] * (1 - fw), lerp(c[1], -1.1, fw), lerp(c[2], .7, fw)]; cw = Math.max(cw, fw); }
     C[k * 3] = c[0] * cw; C[k * 3 + 1] = c[1] * cw; C[k * 3 + 2] = c[2] * cw;
   }
-  return {L, C, curl: st.curl, droop: st.nape ? 1 : (id === 'fringe' ? .6 : .15)};
+  return {L, C, D, curl: st.curl, droop: st.nape ? 1 : (id === 'fringe' ? .6 : .15), lift: st.comb === 'up' ? .5 : st.comb === 'forward' ? .25 : .1};
 }
 
 /* ---------------- renderer ---------------- */
@@ -242,40 +261,49 @@ export function createHeadViewer(canvas, model) {
   const skinVS = `attribute vec3 p;attribute vec3 n;attribute vec3 t0;attribute vec3 t1;attribute vec3 t2;attribute float hl;
     uniform mat4 M;uniform mat4 PR;varying vec3 vt0;varying vec3 vt1;varying vec3 vt2;varying vec3 vn;varying float vhl;varying vec3 vp;
     void main(){vt0=t0;vt1=t1;vt2=t2;vhl=hl;vn=mat3(M)*n;vp=p;gl_Position=PR*M*vec4(p,1.);}`;
-  const skinFS = `precision mediump float;uniform sampler2D s0;uniform sampler2D s1;uniform sampler2D s2;uniform vec3 skin;uniform vec3 hairC;uniform int mode;uniform float hasHair;
+  const skinFS = `precision mediump float;uniform sampler2D s0;uniform sampler2D s1;uniform sampler2D s2;uniform vec3 skin;uniform vec3 hairC;uniform int mode;uniform float hasHair;uniform vec3 g1;uniform vec3 g2;
     varying vec3 vt0;varying vec3 vt1;varying vec3 vt2;varying vec3 vn;varying float vhl;varying vec3 vp;
     void main(){vec3 N=normalize(vn);
-      float dif=max(dot(N,normalize(vec3(-.4,.5,.9))),0.)*.75+max(dot(N,normalize(vec3(.8,.2,-.3))),0.)*.25;
-      if(mode==2){vec3 c=vec3(.72,.7,.68)*(.3+.85*dif);gl_FragColor=vec4(c,1.);return;}
+      vec3 K=normalize(vec3(-.45,.55,.85)),Fl=normalize(vec3(.85,.1,.4));
+      float key=clamp((dot(N,K)+.35)/1.35,0.,1.),fill=max(dot(N,Fl),0.);
+      float dif=key*.78+fill*.22;
+      if(mode==2){vec3 c=vec3(.74,.72,.7)*(.28+.85*dif);gl_FragColor=vec4(c,1.);return;}
       vec3 acc=vec3(0.);float w=0.;
+      float sl=dot(skin,vec3(.3,.59,.11));
       if(vt0.z>0.001&&vt0.x>0.&&vt0.x<1.&&vt0.y>0.&&vt0.y<1.){acc+=texture2D(s0,vt0.xy).rgb*vt0.z;w+=vt0.z;}
-      if(vt1.z>0.001&&vt1.x>0.&&vt1.x<1.&&vt1.y>0.&&vt1.y<1.){acc+=texture2D(s1,vt1.xy).rgb*vt1.z;w+=vt1.z;}
-      if(vt2.z>0.001&&vt2.x>0.&&vt2.x<1.&&vt2.y>0.&&vt2.y<1.){acc+=texture2D(s2,vt2.xy).rgb*vt2.z;w+=vt2.z;}
-      vec3 tex=w>0.?acc/w:skin; float k=smoothstep(.0,.3,w); vec3 c=mix(skin,tex,k)*(.72+.38*dif);
+      if(vt1.z>0.001&&vt1.x>0.&&vt1.x<1.&&vt1.y>0.&&vt1.y<1.){vec3 t1=texture2D(s1,vt1.xy).rgb*g1;float q=vt1.z*smoothstep(.42,.68,dot(t1,vec3(.3,.59,.11))/sl);acc+=t1*q;w+=q;}
+      if(vt2.z>0.001&&vt2.x>0.&&vt2.x<1.&&vt2.y>0.&&vt2.y<1.){vec3 t2=texture2D(s2,vt2.xy).rgb*g2;float q=vt2.z*smoothstep(.42,.68,dot(t2,vec3(.3,.59,.11))/sl);acc+=t2*q;w+=q;}
+      float nz=fract(sin(dot(floor(vp.xy*260.),vec2(41.3,289.1)))*43758.5)*.04-.02;
+      vec3 tex=w>0.?acc/w:skin; float k=smoothstep(.0,.3,w); vec3 base=mix(skin*(1.+nz),tex,k);
+      vec3 c=base*(.5+.62*dif);
       float scalp=smoothstep(.006,.035,vhl)*hasHair; c=mix(c,hairC*.42*(.6+.5*dif),scalp*.94);
       float stub=smoothstep(.0,.008,vhl)*(1.-scalp)*hasHair;
       float g=fract(sin(dot(floor(vp.xy*900.+vp.z*400.),vec2(12.9898,78.233)))*43758.5453);
       c=mix(c,mix(c*.62,hairC*.55,.5)+(g-.5)*.05,stub*.85);
-      gl_FragColor=vec4(c,1.);}`;
-  const hairVS = `attribute vec3 p;attribute vec3 n;attribute float hl;attribute vec3 cd;attribute vec2 uv;
-    uniform mat4 M;uniform mat4 PR;uniform float t;uniform float curl;uniform float droop;varying vec2 vuv;varying vec3 vn;varying float vt;varying float vhl;
+      c=pow(c,vec3(.96));gl_FragColor=vec4(c,1.);}`;
+  const hairVS = `attribute vec3 p;attribute vec3 n;attribute float hl;attribute vec3 cd;attribute vec2 uv;attribute float dn;
+    uniform mat4 M;uniform mat4 PR;uniform float t;uniform float curl;uniform float droop;uniform float lift;varying vec2 vuv;varying vec3 vn;varying vec3 vtg;varying float vt;varying float vhl;varying float vdn;
     float h(vec3 q){return fract(sin(dot(q,vec3(12.9898,78.233,37.719)))*43758.5453);}
     float vn3(vec3 q){vec3 i=floor(q),f=fract(q);f=f*f*(3.-2.*f);
       return mix(mix(mix(h(i),h(i+vec3(1,0,0)),f.x),mix(h(i+vec3(0,1,0)),h(i+vec3(1,1,0)),f.x),f.y),mix(mix(h(i+vec3(0,0,1)),h(i+vec3(1,0,1)),f.x),mix(h(i+vec3(0,1,1)),h(i+vec3(1,1,1)),f.x),f.y),f.z);}
-    void main(){vt=t;vhl=hl;vuv=uv;
+    void main(){vt=t;vhl=hl;vuv=uv;vdn=dn;
       vec3 cl=vec3(vn3(p*14.),vn3(p*14.+7.3),vn3(p*14.+3.1))-.5;
       vec3 cl2=vec3(vn3(p*6.),vn3(p*6.+2.7),vn3(p*6.+5.9))-.5;
-      vec3 dir=normalize(n+cd*1.6*t+cl*curl*1.8*t+cl2*.6*t);
+      vec3 dir=normalize(n*(1.+lift*(1.-t))+cd*1.6*t+cl*curl*1.8*t+cl2*.6*t);
       vec3 q=p+dir*hl*t+vec3(0.,-1.,0.)*hl*t*t*droop*.8;
-      vn=mat3(M)*normalize(n+cd*.6);gl_Position=PR*M*vec4(q,1.);}`;
-  const hairFS = `precision mediump float;uniform vec3 hairC;uniform float t;varying vec2 vuv;varying vec3 vn;varying float vt;varying float vhl;
+      vn=mat3(M)*normalize(n+cd*.6);vtg=mat3(M)*dir;gl_Position=PR*M*vec4(q,1.);}`;
+  const hairFS = `precision mediump float;uniform vec3 hairC;uniform float t;varying vec2 vuv;varying vec3 vn;varying vec3 vtg;varying float vt;varying float vhl;varying float vdn;
     float h(vec2 q){return fract(sin(dot(q,vec2(12.9898,78.233)))*43758.5453);}
     void main(){ if(vhl<.0015)discard;
-      vec2 g=vuv*vec2(1100.,620.);vec2 c=floor(g);vec2 f=fract(g)-.5;float r=h(c);
-      if(pow(r,.7)<vt*.95)discard; if(length(f)>.5*(1.-vt*.7))discard;
-      vec3 N=normalize(vn);float dif=max(dot(N,normalize(vec3(-.4,.6,.8))),0.);
-      vec3 col=hairC*(.22+1.05*vt)*(.7+.5*h(c+3.1));col*=.4+.8*dif;
-      col+=vec3(1.,.92,.82)*pow(max(dot(N,normalize(vec3(-.2,.9,.5))),0.),18.)*.14*vt;
+      vec2 g=vuv*vec2(1400.,800.);vec2 c=floor(g);vec2 f=fract(g)-.5;float r=h(c);
+      if(h(c+11.7)>vdn)discard;
+      if(pow(r,.65)<vt*.96)discard; if(length(f)>.52*(1.-vt*.72))discard;
+      vec3 N=normalize(vn),T=normalize(vtg),L=normalize(vec3(-.45,.6,.75)),V=vec3(0.,0.,1.),H=normalize(L+V);
+      float dif=mix(.35,1.,clamp(dot(N,L)*.5+.5,0.,1.));
+      float th=dot(T,H),s1=pow(sqrt(max(0.,1.-th*th)),90.),th2=dot(T,normalize(H+N*.25)),s2=pow(sqrt(max(0.,1.-th2*th2)),26.);
+      float ao=mix(.28,1.,pow(vt,.7));
+      float v1=h(c+3.1),v2=h(c+7.7);vec3 base=hairC*(.62+.75*v1)*mix(vec3(1.),vec3(1.08,.97,.86),v2)*mix(.6,1.,smoothstep(0.,.5,vt));
+      vec3 col=base*dif*ao+vec3(1.,.95,.88)*s1*.22*vt+base*vec3(1.2,1.,.85)*s2*.35*vt;
       gl_FragColor=vec4(col,1.);}`;
   const lineVS = `attribute vec3 p;uniform mat4 M;uniform mat4 PR;void main(){gl_Position=PR*M*vec4(p,1.);}`;
   const lineFS = `precision mediump float;void main(){gl_FragColor=vec4(.98,.36,0.,.9);}`;
@@ -315,23 +343,24 @@ export function createHeadViewer(canvas, model) {
   const uv = new Float32Array(model.hp.length * 2);
   model.hp.forEach((p, k) => { uv[k * 2] = (model.hTheta[k] + Math.PI) / (Math.PI * 2); uv[k * 2 + 1] = (model.hPhi[k] + Math.PI / 2) / Math.PI; });
   const uvB = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, uvB); gl.bufferData(gl.ARRAY_BUFFER, uv, gl.STATIC_DRAW);
-  const hlB = gl.createBuffer(), cdB = gl.createBuffer(), hairIB = gl.createBuffer();
-  let hairCount = 0, hairParams = {curl: 0, droop: 0}, hasHair = 1;
+  const hlB = gl.createBuffer(), cdB = gl.createBuffer(), dnB = gl.createBuffer(), hairIB = gl.createBuffer();
+  let hairCount = 0, hairParams = {curl: 0, droop: 0, lift: 0}, hasHair = 1, hairColor = model.hairC.slice();
   function setStyle(id) {
     const f = hairField(model, id);
     gl.bindBuffer(gl.ARRAY_BUFFER, hlB); gl.bufferData(gl.ARRAY_BUFFER, f.L, gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, cdB); gl.bufferData(gl.ARRAY_BUFFER, f.C, gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, dnB); gl.bufferData(gl.ARRAY_BUFFER, f.D, gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, head.h); gl.bufferData(gl.ARRAY_BUFFER, f.L, gl.STATIC_DRAW);
     const I = [], src = model.hIdx; for (let t = 0; t < src.length; t += 3) if (f.L[src[t]] > 0.0008 || f.L[src[t + 1]] > 0.0008 || f.L[src[t + 2]] > 0.0008) I.push(src[t], src[t + 1], src[t + 2]);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, hairIB); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(I), gl.STATIC_DRAW);
-    hairCount = I.length; hairParams = {curl: f.curl, droop: f.droop};
+    hairCount = I.length; hairParams = {curl: f.curl, droop: f.droop, lift: f.lift};
   }
 
   const attr = (p, name, buf, size) => { const l = gl.getAttribLocation(p, name); if (l < 0) return; gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l, size, gl.FLOAT, false, 0, 0); };
   const off = p => { const n = gl.getProgramParameter(p, gl.ACTIVE_ATTRIBUTES); for (let i = 0; i < 8; i++) gl.disableVertexAttribArray(i); };
 
-  const st = {yaw: 0.5, pitch: 0.05, auto: true, mode: 0, hair: true, drag: null, t0: performance.now(), raf: 0, zoom: 1};
-  canvas.onpointerdown = e => { canvas.setPointerCapture(e.pointerId); st.drag = {x: e.clientX, y: e.clientY, yaw: st.yaw, pitch: st.pitch}; st.auto = false; };
+  const st = {yaw: 0.5, pitch: 0.05, auto: true, mode: 0, hair: true, drag: null, t0: performance.now(), raf: 0, zoom: 1, target: null};
+  canvas.onpointerdown = e => { canvas.setPointerCapture(e.pointerId); st.drag = {x: e.clientX, y: e.clientY, yaw: st.yaw, pitch: st.pitch}; st.auto = false; st.target = null; if (st.onManual) st.onManual(); };
   canvas.onpointermove = e => { if (!st.drag) return; st.yaw = st.drag.yaw + (e.clientX - st.drag.x) / 140; st.pitch = Math.max(-.7, Math.min(.7, st.drag.pitch + (e.clientY - st.drag.y) / 220)); };
   canvas.onpointerup = canvas.onpointercancel = () => { st.drag = null; };
   canvas.onwheel = e => { e.preventDefault(); st.zoom = Math.max(.7, Math.min(1.6, st.zoom * (e.deltaY > 0 ? .94 : 1.06))); };
@@ -341,7 +370,12 @@ export function createHeadViewer(canvas, model) {
     const dpr = devicePixelRatio || 1, w = Math.round(canvas.clientWidth * dpr), h = Math.round(canvas.clientHeight * dpr);
     if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
     gl.viewport(0, 0, w, h); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); gl.enable(gl.DEPTH_TEST);
-    if (st.auto && !matchMedia('(prefers-reduced-motion: reduce)').matches) st.yaw = 0.5 + (time - st.t0) / 1000 * 0.45;
+    const dt = Math.min(0.25, (time - (st.last || time)) / 1000); st.last = time;
+    if (st.target) {
+      const k = 1 - Math.exp(-dt * 7), d = Math.atan2(Math.sin(st.target.yaw - st.yaw), Math.cos(st.target.yaw - st.yaw));
+      st.yaw += d * k; st.pitch += (st.target.pitch - st.pitch) * k;
+      if (Math.abs(d) < 0.003 || time - st.target.t > 1400) { st.yaw = st.target.yaw; st.pitch = st.target.pitch; st.target = null; }
+    } else if (st.auto && !matchMedia('(prefers-reduced-motion: reduce)').matches) { st.yaw += dt * 0.45; }
     const I = model.headInfo;
     const R = mul3(rotX(st.pitch), rotY(st.yaw));
     const c = app3(R, [0, -I.cyH + 0.06, -I.cz]);
@@ -352,7 +386,8 @@ export function createHeadViewer(canvas, model) {
     // skin pass
     gl.useProgram(P1);
     gl.uniformMatrix4fv(gl.getUniformLocation(P1, 'M'), false, M); gl.uniformMatrix4fv(gl.getUniformLocation(P1, 'PR'), false, PR);
-    gl.uniform3fv(gl.getUniformLocation(P1, 'skin'), model.skin); gl.uniform3fv(gl.getUniformLocation(P1, 'hairC'), model.hairC);
+    gl.uniform3fv(gl.getUniformLocation(P1, 'skin'), model.skin); gl.uniform3fv(gl.getUniformLocation(P1, 'hairC'), hairColor);
+    gl.uniform3fv(gl.getUniformLocation(P1, 'g1'), model.gains[1]); gl.uniform3fv(gl.getUniformLocation(P1, 'g2'), model.gains[2]);
     gl.uniform1i(gl.getUniformLocation(P1, 'mode'), st.mode); gl.uniform1f(gl.getUniformLocation(P1, 'hasHair'), st.hair ? 1 : 0);
     [0, 1, 2].forEach(k => { gl.activeTexture(gl.TEXTURE0 + k); gl.bindTexture(gl.TEXTURE_2D, texs[k]); gl.uniform1i(gl.getUniformLocation(P1, 's' + k), k); });
     for (const m of [head, neck, ears]) {
@@ -367,11 +402,11 @@ export function createHeadViewer(canvas, model) {
     if (st.hair && hairCount) {
       gl.useProgram(P2);
       gl.uniformMatrix4fv(gl.getUniformLocation(P2, 'M'), false, M); gl.uniformMatrix4fv(gl.getUniformLocation(P2, 'PR'), false, PR);
-      gl.uniform3fv(gl.getUniformLocation(P2, 'hairC'), model.hairC);
-      gl.uniform1f(gl.getUniformLocation(P2, 'curl'), hairParams.curl); gl.uniform1f(gl.getUniformLocation(P2, 'droop'), hairParams.droop);
-      off(P2); attr(P2, 'p', head.pos, 3); attr(P2, 'n', head.nor, 3); attr(P2, 'hl', hlB, 1); attr(P2, 'cd', cdB, 3); attr(P2, 'uv', uvB, 2);
+      gl.uniform3fv(gl.getUniformLocation(P2, 'hairC'), hairColor);
+      gl.uniform1f(gl.getUniformLocation(P2, 'curl'), hairParams.curl); gl.uniform1f(gl.getUniformLocation(P2, 'droop'), hairParams.droop); gl.uniform1f(gl.getUniformLocation(P2, 'lift'), hairParams.lift);
+      off(P2); attr(P2, 'p', head.pos, 3); attr(P2, 'n', head.nor, 3); attr(P2, 'hl', hlB, 1); attr(P2, 'cd', cdB, 3); attr(P2, 'uv', uvB, 2); attr(P2, 'dn', dnB, 1);
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, hairIB);
-      const NS = 36, tl = gl.getUniformLocation(P2, 't');
+      const NS = 48, tl = gl.getUniformLocation(P2, 't');
       for (let i = 1; i <= NS; i++) { gl.uniform1f(tl, i / NS); gl.drawElements(gl.TRIANGLES, hairCount, gl.UNSIGNED_SHORT, 0); }
     }
     if (st.mode === 1) {
@@ -387,6 +422,11 @@ export function createHeadViewer(canvas, model) {
     start() { if (!st.raf) st.raf = requestAnimationFrame(frame); },
     stop() { cancelAnimationFrame(st.raf); st.raf = 0; },
     resetView() { st.auto = true; st.t0 = performance.now(); },
+    setView(v) { const Y = {front: 0, side: Math.PI / 2, back: Math.PI, other: -Math.PI / 2}; st.auto = false; st.target = {yaw: Y[v] ?? 0, pitch: 0.04, t: performance.now()}; },
+    setSpin(b) { st.auto = b; st.target = null; },
+    onManual(fn) { st.onManual = fn; },
+    setHairColor(c) { hairColor = c ? c.slice() : model.hairC.slice(); },
+    naturalHair: model.hairC.slice(),
     views: model.views.length
   };
 }
