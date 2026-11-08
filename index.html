@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="finder.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Big+Shoulders+Display:wght@700;800;900&family=Rye&family=Yesteryear&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Big+Shoulders+Display:wght@700;800;900&family=Alfa+Slab+One&family=Yesteryear&display=swap" rel="stylesheet">
 <style>
 :root{
   --black:#000;
@@ -172,7 +172,7 @@ footer a:hover{color:#fff}
 /* ---------- colour & motion pass ---------- */
 body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:200;opacity:.06;mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-.logo-wrap{position:relative;width:min(300px,56vw);margin-bottom:clamp(20px,4vw,48px);aspect-ratio:1.23;display:grid;place-items:center;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .25s ease-out}
+.logo-wrap{position:relative;width:min(300px,56vw);margin-top:calc(min(300px,56vw)*.2);margin-bottom:calc(min(300px,56vw)*.24 + clamp(18px,3vw,34px));aspect-ratio:1.23;display:grid;place-items:center;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .25s ease-out}
 .logo-wrap::before{content:"";position:absolute;inset:-18%;border-radius:50%;background:radial-gradient(circle at 40% 45%,rgba(250,90,0,.55),rgba(139,92,255,.35) 45%,transparent 70%);filter:blur(30px);opacity:0;transition:opacity 1.2s ease .4s;animation:glow 5s ease-in-out infinite}
 .hero.revealed .logo-wrap::before{opacity:1}
 @keyframes glow{50%{transform:scale(1.12) rotate(20deg)}}
@@ -215,7 +215,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:200;o
 
 
 /* fancier hero title: sign-painter western + barbershop script */
-.title h1{font-family:"Rye",Georgia,serif;font-weight:400;background:none;-webkit-text-fill-color:#fff;color:#fff;font-size:clamp(50px,8.6vw,124px);line-height:.95;letter-spacing:.03em;
+.title h1{font-family:"Alfa Slab One",Georgia,serif;font-weight:400;background:none;-webkit-text-fill-color:#fff;color:#fff;font-size:clamp(46px,7.8vw,112px);line-height:.95;letter-spacing:.02em;
   text-shadow:0 3px 0 rgba(0,0,0,.35);padding-top:.05em}
 .title h1 small{font-family:"Yesteryear","Brush Script MT",cursive;font-weight:400;text-transform:none;letter-spacing:.01em;
   font-size:.62em;line-height:1;margin-top:-.08em;padding-left:0;transform:rotate(-5deg);display:block;
