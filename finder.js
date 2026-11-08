@@ -322,7 +322,7 @@ function camLoop() {
         else if (a === 'sweep' && SW.on) { msg = sweepStep(L, t); ok = false; }
         else if (prob) msg = prob.replace(/\.$/, '');
         else { msg = 'Hold still'; ok = true; }
-        g.fillStyle = ok || (a === 'sweep') ? 'rgba(250,90,0,.9)' : 'rgba(255,255,255,.55)';
+        g.fillStyle = ok || (a === 'sweep') ? 'rgba(228,80,42,.9)' : 'rgba(255,255,255,.55)';
         const rr = Math.max(1.1, cv.width / 300);
         for (let i = 0; i < L.length; i += ok || a === 'sweep' ? 1 : 2) { const q = L[i]; g.beginPath(); g.arc(ox + (1 - q.x) * dw, oy + q.y * dh, rr, 0, 7); g.fill(); }
       }
@@ -453,7 +453,7 @@ function drawLens(p, meshAlpha, upto) {
   g.drawImage(p.img, G.ox, G.oy, p.w * G.k, p.h * G.k);
   if (!p.lm || !meshAlpha) return;
   const L = p.lm, n = upto == null ? L.length : upto;
-  g.fillStyle = `rgba(250,90,0,${meshAlpha})`;
+  g.fillStyle = `rgba(228,80,42,${meshAlpha})`;
   const r = Math.max(1.2, cv.width / 260);
   for (let i = 0; i < n; i++) { const q = L[i]; g.beginPath(); g.arc(G.ox + q.x * p.w * G.k, G.oy + q.y * p.h * G.k, r, 0, 7); g.fill(); }
 }
@@ -514,10 +514,10 @@ function drawMeasure(p, m, k) {
     const kk = Math.max(0, Math.min(1, k * 4 - i));
     if (!kk) return;
     const [x1, y1] = P(a), [x2, y2] = P(b);
-    g.strokeStyle = '#fa5a00'; g.lineWidth = lw * 1.4; g.setLineDash([]);
+    g.strokeStyle = '#e4502a'; g.lineWidth = lw * 1.4; g.setLineDash([]);
     g.beginPath(); g.moveTo(x1, y1); g.lineTo(x1 + (x2 - x1) * kk, y1 + (y2 - y1) * kk); g.stroke();
     if (kk === 1) {
-      g.fillStyle = '#fa5a00';
+      g.fillStyle = '#e4502a';
       [[x1, y1], [x2, y2]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, lw * 2.2, 0, 7); g.fill(); });
       g.fillStyle = '#fff'; g.strokeStyle = 'rgba(0,0,0,.75)'; g.lineWidth = lw * 2.5;
       const tx = t === 'Length' ? x1 + lw * 6 : Math.max(x1, x2) + lw * 6, ty = t === 'Length' ? (y1 + y2) / 2 : (y1 + y2) / 2 + lw * 3;
