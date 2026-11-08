@@ -221,6 +221,23 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:200;o
   font-size:.62em;line-height:1;margin-top:-.08em;padding-left:0;transform:rotate(-5deg);display:block;
   -webkit-text-fill-color:var(--orange);color:var(--orange);text-shadow:0 4px 18px rgba(250,90,0,.35)}
 
+
+/* hero logo motion */
+.logo-float{position:relative;width:100%;animation:logoFloat 5.5s ease-in-out 2.4s infinite}
+@keyframes logoFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-10px) rotate(-1.2deg)}}
+.hero.revealed .title .logo{animation:logoIn 1.7s cubic-bezier(.2,.85,.25,1.15) .15s both}
+@keyframes logoIn{0%{opacity:0;transform:perspective(900px) rotateY(-540deg) scale(.35);filter:blur(10px)}
+  60%{opacity:1;filter:blur(0)}75%{transform:perspective(900px) rotateY(12deg) scale(1.08)}100%{opacity:1;transform:none;filter:none}}
+.title .logo.spin{animation:logoSpin .9s cubic-bezier(.3,.7,.25,1)!important}
+@keyframes logoSpin{0%{transform:perspective(900px) rotateY(0) scale(1)}45%{transform:perspective(900px) rotateY(200deg) scale(1.08)}100%{transform:perspective(900px) rotateY(360deg) scale(1)}}
+.logo-wrap{cursor:pointer}
+.orbit{position:absolute;width:128%;aspect-ratio:1;left:-14%;top:50%;transform:translateY(-50%);pointer-events:none;opacity:0;transition:opacity .8s ease 1.6s;animation:spin 7s linear infinite}
+.hero.revealed .orbit{opacity:1}
+.orbit::before{content:"";position:absolute;top:2.5%;left:50%;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#fff;
+  box-shadow:0 0 6px 2px #fff,0 0 18px 6px var(--orange),0 0 40px 14px rgba(250,90,0,.45)}
+.orbit::after{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(from -70deg,transparent 0deg,rgba(250,90,0,.0) 10deg,rgba(250,90,0,.55) 68deg,transparent 70deg);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2px))}
+
 /* finished-cuts gallery */
 .grid{grid-template-columns:repeat(3,1fr);grid-auto-rows:auto;grid-auto-flow:dense;gap:12px}
 .grid .gx{aspect-ratio:4/5;grid-column:auto;grid-row:auto}
@@ -289,8 +306,8 @@ footer{background:var(--ink)}
     <div class="title">
       <div class="logo-wrap" id="logoWrap">
         <svg class="ring-text" viewBox="0 0 200 200" aria-hidden="true"><defs><path id="ringPath" d="M100,100 m-86,0 a86,86 0 1,1 172,0 a86,86 0 1,1 -172,0"/></defs><text textLength="532" lengthAdjust="spacing"><textPath href="#ringPath" startOffset="0" textLength="532" lengthAdjust="spacing">HUNCHO BARBERS ✦ PAYNEHAM ✦ WALK-INS WELCOME ✦ OPEN 7 DAYS ✦</textPath></text></svg>
-        <img class="logo" src="img/logo.png" alt="Huncho Barbers logo">
-        <span class="shine" aria-hidden="true"></span>
+        <span class="orbit" aria-hidden="true"></span>
+        <div class="logo-float"><img class="logo" id="heroLogo" src="img/logo.png" alt="Huncho Barbers logo"><span class="shine" aria-hidden="true"></span></div>
       </div>
       <h1>Huncho<small>Barbers</small></h1>
       <p>Sharp fades, clean tapers and proper beard work on Payneham Road. Walk in any day of the week.</p>
@@ -605,6 +622,14 @@ footer{background:var(--ink)}
   // logo follows the pointer a little
   const lw=document.getElementById('logoWrap');
   if(lw && !reduce){ hero.addEventListener('pointermove',e=>{const r=hero.getBoundingClientRect();const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;lw.style.setProperty('--ry',(x*16).toFixed(2)+'deg');lw.style.setProperty('--rx',(-y*12).toFixed(2)+'deg');}); hero.addEventListener('pointerleave',()=>{lw.style.setProperty('--ry','0deg');lw.style.setProperty('--rx','0deg');}); }
+
+  // logo: drop the entrance animation once done, spin on hover/tap
+  const hl=document.getElementById('heroLogo');
+  if(hl){
+    hl.addEventListener('animationend',e=>{ if(e.animationName==='logoIn'){ hl.style.animation='none'; hl.style.opacity='1'; hl.style.filter='none'; hl.style.transform='none'; } if(e.animationName==='logoSpin') hl.classList.remove('spin'); });
+    const spin=()=>{ if(reduce||!hero.classList.contains('revealed')||hl.classList.contains('spin')) return; hl.classList.add('spin'); };
+    lw && lw.addEventListener('pointerenter',spin); lw && lw.addEventListener('click',spin);
+  }
 
   // solid bar after hero
   const onScroll=()=>{ const s=window.scrollY>window.innerHeight*0.6; bar.classList.toggle('solid',s); if(s) bar.classList.add('show'); };
